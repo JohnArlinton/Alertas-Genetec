@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador Interactivo: Alertas Genetec SDK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-button {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .tab-button.active {
+            border-bottom-width: 4px;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        h2 {
+            font-size: 1.75rem; /* text-2xl */
+            font-weight: 600; /* semibold */
+            margin-bottom: 1rem;
+            color: #2c5282; /* Tailwind's blue-700, a bit darker for titles */
+        }
+        h3 {
+            font-size: 1.5rem; /* text-xl */
+            font-weight: 600; /* semibold */
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #3182ce; /* Tailwind's blue-600 */
+        }
+        h4 {
+            font-size: 1.25rem; /* text-lg */
+            font-weight: 600; /* semibold */
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: #4299e1; /* Tailwind's blue-500 */
+        }
+        p, li {
+            line-height: 1.65;
+            margin-bottom: 0.75rem;
+        }
+        code {
+            background-color: #edf2f7; /* gray-200 */
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 0.9em;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e2e8f0; /* gray-300 */
+            padding: 0.75rem; /* p-3 */
+            text-align: left;
+            font-size: 0.875rem; /* text-sm */
+        }
+        th {
+            background-color: #f7fafc; /* gray-100 */
+            font-weight: 600; /* semibold */
+        }
+        .insight-block {
+            background-color: #ebf8ff; /* blue-50 */
+            border-left: 4px solid #63b3ed; /* blue-400 */
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.25rem;
+        }
+        .critical { color: #e53e3e; font-weight: bold; } /* red-600 */
+        .warning { color: #dd6b20; font-weight: bold; } /* orange-600 */
+        .informative { color: #3182ce; } /* blue-600 */
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800 antialiased">
+
+    <div class="container mx-auto max-w-6xl p-4 sm:p-6 md:p-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-sky-700">Explorador Interactivo de Alertas Genetec SDK</h1>
+            <p class="text-lg text-stone-600 mt-2">Una guía para la integración de alertas de video y salud con Genetec Security Center SDK 5.12</p>
+        </header>
+
+        <nav class="mb-8 sticky top-0 z-10 bg-stone-100 py-3 shadow-md rounded-lg">
+            <ul class="flex flex-wrap justify-center space-x-2 sm:space-x-4">
+                <li><button data-tab="resumen" class="tab-button active text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-3 font-semibold text-sky-700 border-sky-600 rounded-t-md hover:bg-sky-100">Resumen e Introducción</button></li>
+                <li><button data-tab="salud" class="tab-button text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-3 font-semibold text-sky-700 border-transparent rounded-t-md hover:bg-sky-100 hover:border-sky-500">Eventos de Salud</button></li>
+                <li><button data-tab="video" class="tab-button text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-3 font-semibold text-sky-700 border-transparent rounded-t-md hover:bg-sky-100 hover:border-sky-500">Eventos de Video</button></li>
+                <li><button data-tab="analiticas" class="tab-button text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-3 font-semibold text-sky-700 border-transparent rounded-t-md hover:bg-sky-100 hover:border-sky-500">Eventos de Analíticas</button></li>
+                <li><button data-tab="recomendaciones" class="tab-button text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-3 font-semibold text-sky-700 border-transparent rounded-t-md hover:bg-sky-100 hover:border-sky-500">Recomendaciones</button></li>
+            </ul>
+        </nav>
+
+        <main class="bg-white p-6 sm:p-8 rounded-lg shadow-xl">
+            <section id="resumen" class="content-section active">
+                <h2>Resumen Ejecutivo</h2>
+                <p>Este informe técnico analiza la disponibilidad y la relevancia de los eventos de alerta de video y salud dentro del SDK 5.12 de Genetec Security Center, con el objetivo de facilitar la integración de software de video para la generación de alertas. Se confirma que el SDK ofrece una amplia gama de eventos para monitorear la conectividad de cámaras y grabadoras (DVR/NVR), la pérdida de señal o el oscurecimiento de cámaras, y capacidades avanzadas de analíticas de video como la detección y el conteo de personas. La arquitectura de eventos del SDK permite una integración robusta para la generación de alertas personalizadas, subrayando la importancia de una configuración adecuada del sistema Genetec para la emisión precisa de estos eventos.</p>
+
+                <h3>Introducción a la Gestión de Alertas en Genetec Security Center SDK</h3>
+                <p>La integración de un software de video con Genetec Security Center exige una comprensión profunda de su modelo de eventos para generar alertas significativas y procesables. El SDK de Genetec proporciona una interfaz programática rica para interactuar con el sistema, donde los eventos constituyen el pilar fundamental para el monitoreo y la respuesta automatizada.</p>
+                <p>El espacio de nombres <code>Genetec.Sdk.Events</code> [1] es el componente central que encapsula toda la funcionalidad de eventos dentro del SDK. Este espacio de nombres incluye la clase base <code>abstract class Event</code> [1], de la cual se derivan todos los eventos específicos, garantizando un modelo unificado para el manejo de diversas ocurrencias en el sistema. La existencia de <code>class SdkEvent</code> [1] representa un tipo genérico de evento del SDK, lo que sugiere que todos los eventos se procesan de manera consistente a través de la interfaz. Además, <code>static class EventsProvider</code> [1] es una clase auxiliar diseñada para recuperar listas de eventos del SDK, lo que implica que los eventos son descubribles y gestionables programáticamente, facilitando la configuración de la lógica de alerta.</p>
+                <p>Las alertas son cruciales para mantener la operatividad y seguridad de un sistema de videovigilancia. Permiten la detección temprana de fallos de hardware, problemas de conectividad o situaciones de seguridad críticas, facilitando una respuesta rápida y eficiente. Una integración efectiva de alertas no solo mejora la conciencia situacional, sino que también optimiza los tiempos de respuesta ante incidentes, minimizando el impacto operativo y de seguridad.</p>
+            </section>
+
+            <section id="salud" class="content-section">
+                <h2>Eventos de Salud (Health Monitoring Events) para la Integración</h2>
+                <p>El espacio de nombres <code>Genetec.Sdk.Events.HealthMonitoringEvents</code> [1] es esencial para monitorear el estado general del sistema y sus componentes. Proporciona una capa de eventos de alto nivel que informan sobre la "salud" del sistema, lo que los hace ideales para la generación de alertas relacionadas con la infraestructura.</p>
+
+                <h4>Alertas de Conectividad de Cámaras</h4>
+                <p>El monitoreo de la conectividad de las cámaras es fundamental para asegurar la disponibilidad continua de la vigilancia por video. El SDK ofrece eventos específicos para este propósito:</p>
+                <ul>
+                    <li><strong><code>HealthMonitoringCameraConnectionStoppedUnexpectedlyEvent</code></strong>: Este evento indica una desconexión inesperada de la cámara.[1] Representa una situación crítica que requiere atención inmediata.</li>
+                    <li><strong><code>HealthMonitoringCameraConnectionStoppedByUserEvent</code></strong>: Este evento señala que la conexión de la cámara fue detenida por un usuario.[1] Es importante para propósitos de auditoría.</li>
+                    <li><strong><code>HealthMonitoringCameraConnectionNotMonitoredEvent</code></strong>: Este evento advierte que la conexión de una cámara específica no está siendo monitoreada por el sistema.[1]</li>
+                    <li><strong><code>HealthMonitoringCameraConnectionEstablishedEvent</code></strong>: Este evento confirma que la conexión de la cámara se ha restablecido.[1]</li>
+                </ul>
+
+                <h4>Alertas de Conectividad de Grabadoras (Archiver/DVR/NVR)</h4>
+                <p>La disponibilidad de las grabadoras es tan crítica como la de las cámaras. Los eventos de salud del archivador proporcionan visibilidad sobre su estado:</p>
+                <ul>
+                    <li><strong><code>HealthMonitoringAllArchivingStoppedEvent</code></strong>: Indica que todo el proceso de archivado se ha detenido.[1] Evento de alta criticidad.</li>
+                    <li><strong><code>HealthMonitoringAllArchivingNotMonitoredEvent</code></strong>: Indica que el archivado no está siendo monitoreado [1].</li>
+                    <li><strong><code>HealthMonitoringAllArchivingRestartedEvent</code></strong>: Señala que el archivado se ha reiniciado [1].</li>
+                    <li><strong>Eventos de "Trickling" del Archivador</strong>: Eventos como <code>HealthMonitoringArchiverTricklingFailureEvent</code>, <code>HealthMonitoringArchiverTricklingNotMonitoredEvent</code>, etc. [1] son indicadores detallados de la salud del proceso de transferencia de archivos.</li>
+                </ul>
+
+                <h4>Alertas de Señal de Video y Obscurecimiento de Cámaras</h4>
+                <p>La calidad y la presencia de la señal de video son vitales. Los siguientes eventos abordan estas preocupaciones:</p>
+                <ul>
+                    <li><strong><code>HealthMonitoringVideoSignalLossEvent</code></strong>: Representa una pérdida de señal de video.[1] Relevante para cámaras oscurecidas o problemas de transmisión.</li>
+                    <li><strong><code>HealthMonitoringVideoSignalNotMonitoredEvent</code></strong>: Advierte que la pérdida de señal de video no está siendo monitoreada [1].</li>
+                    <li><strong><code>HealthMonitoringVideoSignalRecoveredEvent</code></strong>: Confirma la recuperación de la señal de video [1].</li>
+                </ul>
+
+                <h4>Otros Eventos Críticos de Salud de Unidades de Video y Roles de Archivador</h4>
+                <ul>
+                    <li><strong>Eventos de espacio de archivo</strong>: <code>HealthMonitoringLowArchiveSpaceEvent</code>, etc.[1] Cruciales para la gestión proactiva del almacenamiento.</li>
+                    <li><strong>Eventos de problemas de grabación</strong>: <code>HealthMonitoringCameraRecordingProblemEvent</code>, etc.[1] Indican dificultades de grabación.</li>
+                    <li><strong>Eventos de estado de la unidad</strong>: <code>HealthMonitoringEntityOfflineEvent</code>, <code>HealthMonitoringEntityOnlineEvent</code>, <code>HealthMonitoringUnitConnectionFailedEvent</code>.[1] Monitorean el estado general de unidades.</li>
+                </ul>
+                
+                <div class="insight-block">
+                    <p><strong>Modelo de Eventos por Capas:</strong> Los eventos de <code>HealthMonitoring</code> son generados por el rol de monitoreo de salud del sistema Genetec, supervisando el estado general. Los eventos de <code>CameraEvent</code> son generados directamente por la cámara o el archivador, representando un problema más cercano a la fuente. La combinación de ambos puede proporcionar una resiliencia mejorada.</p>
+                </div>
+                <div class="insight-block">
+                    <p><strong>Alertas Preventivas y Reactivas:</strong> Eventos como <code>HealthMonitoringLowArchiveSpaceEvent</code> son advertencias de riesgos futuros, mientras que <code>HealthMonitoringAllArchivingStoppedEvent</code> indica un fallo ya ocurrido. Incluir eventos proactivos permite tomar medidas correctivas antes de interrupciones.</p>
+                </div>
+                 <div class="insight-block">
+                    <p><strong>Interconexión de Fallos:</strong> Un problema en un archivador (<code>HealthMonitoringAllArchivingStoppedEvent</code>) puede causar múltiples problemas en cámaras (<code>CameraNotArchivingEvent</code>). La lógica de integración debe priorizar y correlacionar estos eventos para evitar fatiga por alertas y focalizar la respuesta.</p>
+                </div>
+
+                <h3>Tabla 1: Eventos de Salud Clave para Conectividad y Señal</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre del Evento (Clase)</th>
+                                <th>Descripción</th>
+                                <th>Relevancia para la Alerta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>HealthMonitoringCameraConnectionStoppedUnexpectedlyEvent</code></td><td>Conexión de cámara detenida inesperadamente.</td><td class="critical">Crítico</td></tr>
+                            <tr><td><code>HealthMonitoringCameraConnectionStoppedByUserEvent</code></td><td>Conexión de cámara detenida por el usuario.</td><td class="informative">Informativo</td></tr>
+                            <tr><td><code>HealthMonitoringCameraConnectionNotMonitoredEvent</code></td><td>Conexión de cámara no monitoreada.</td><td class="warning">Advertencia</td></tr>
+                            <tr><td><code>HealthMonitoringCameraConnectionEstablishedEvent</code></td><td>Conexión de cámara establecida.</td><td class="informative">Informativo</td></tr>
+                            <tr><td><code>HealthMonitoringAllArchivingStoppedEvent</code></td><td>Todo el archivado se detuvo.</td><td class="critical">Crítico</td></tr>
+                            <tr><td><code>HealthMonitoringAllArchivingNotMonitoredEvent</code></td><td>Todo el archivado no está siendo monitoreado.</td><td class="warning">Advertencia</td></tr>
+                            <tr><td><code>HealthMonitoringAllArchivingRestartedEvent</code></td><td>Todo el archivado se reinició.</td><td class="informative">Informativo</td></tr>
+                            <tr><td><code>HealthMonitoringArchiverTricklingFailureEvent</code></td><td>Fallo en el "trickling" del archivador.</td><td class="critical">Crítico</td></tr>
+                            <tr><td><code>HealthMonitoringArchiverTricklingNotMonitoredEvent</code></td><td>"Trickling" del archivador no monitoreado.</td><td class="warning">Advertencia</td></tr>
+                            <tr><td><code>HealthMonitoringArchiverTricklingPartialFailureEvent</code></td><td>Fallo parcial en el "trickling" del archivador.</td><td class="warning">Advertencia</td></tr>
+                            <tr><td><code>HealthMonitoringArchiverTricklingRetryEvent</code></td><td>Reintento en el "trickling" del archivador.</td><td class="informative">Informativo</td></tr>
+                            <tr><td><code>HealthMonitoringArchiverTricklingSuccessEvent</code></td><td>Éxito en el "trickling" del archivador.</td><td class="informative">Informativo</td></tr>
+                            <tr><td><code>HealthMonitoringVideoSignalLossEvent</code></td><td>Pérdida de señal de video.</td><td class="critical">Crítico</td></tr>
+                            <tr><td><code>HealthMonitoringVideoSignalNotMonitoredEvent</code></td><td>Pérdida de señal de video no monitoreada.</td><td class="warning">Advertencia</td></tr>
+                            <tr><td><code>HealthMonitoringVideoSignalRecoveredEvent</code></td><td>Señal de video recuperada.</td><td class="informative">Informativo</td></tr>
+                            <tr><td><code>HealthMonitoringLowArchiveSpaceEvent</code></td><td>Espacio de archivo bajo.</td><td class="warning">Advertencia</td></tr>
+                            <tr><td><code>HealthMonitoringCameraRecordingProblemEvent</code></td><td>Problema de grabación de cámara.</td><td class="critical">Crítico</td></tr>
+                            <tr><td><code>HealthMonitoringEntityOfflineEvent</code></td><td>Entidad (unidad de video, grabadora) fuera de línea.</td><td class="critical">Crítico</td></tr>
+                            <tr><td><code>HealthMonitoringUnitConnectionFailedEvent</code></td><td>Conexión de unidad fallida.</td><td class="critical">Crítico</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Esta tabla es una herramienta invaluable para el gestor de integración, ya que consolida y clasifica los eventos más críticos relacionados con la infraestructura del sistema de videovigilancia.</p>
+            </section>
+
+            <section id="video" class="content-section">
+                <h2>Eventos de Video (Video Events) Específicos</h2>
+                <p>El espacio de nombres <code>Genetec.Sdk.Events.Video</code> [1] contiene eventos más específicos relacionados con el comportamiento y el estado de las transmisiones de video, la grabación y las actividades de la cámara. Estos eventos complementan los eventos de salud al proporcionar detalles más granulares sobre el flujo de video.</p>
+
+                <h4>Pérdida y Recuperación de Señal/Transmisión</h4>
+                <p>La integridad de la señal de video es fundamental. Los siguientes eventos son clave:</p>
+                <ul>
+                    <li><strong><code>CameraSignalLostEvent</code></strong>: Pérdida directa de la señal de la cámara.[1] Fundamental para detectar problemas de cableado o fallos.</li>
+                    <li><strong><code>CameraSignalRecoveredEvent</code></strong>: Recuperación de la señal de la cámara [1].</li>
+                    <li><strong><code>CameraTransmissionLostEvent</code></strong>: Pérdida de transmisión de la cámara.[1] Podría indicar un problema de red.</li>
+                    <li><strong><code>CameraTransmissionRecoveredEvent</code></strong>: Comunicación entre archivador y cámara recuperada [1].</li>
+                </ul>
+
+                <h4>Problemas de Archivado y Bloqueo de Video</h4>
+                <p>Situaciones críticas que requieren alerta inmediata:</p>
+                <ul>
+                    <li><strong><code>CameraNotArchivingEvent</code></strong>: Una cámara específica no está archivando video.[1] Alerta directa sobre falta de grabación.</li>
+                    <li><strong><code>CameraStartBlockEvent</code> / <code>CameraStopBlockEvent</code></strong>: Inicio y detención de un bloqueo de video.[1] Puede ser intencional o un problema.</li>
+                    <li><strong><code>CameraAbnormalMotionEvent</code></strong>: Movimiento anormal de la cámara.[1] Útil para detectar manipulación física o vibraciones.</li>
+                </ul>
+
+                <h4>Eventos de Movimiento</h4>
+                <p>Detección de movimiento básica pero esencial:</p>
+                <ul>
+                    <li><strong><code>CameraMotionEvent</code></strong>: Evento genérico de movimiento de cámara [1].</li>
+                    <li><strong><code>CameraMotionOnEvent</code></strong>: Se ha detectado movimiento en la cámara [1].</li>
+                    <li><strong><code>CameraMotionOffEvent</code></strong>: El movimiento ha cesado [1].</li>
+                </ul>
+
+                <div class="insight-block">
+                    <p><strong>Complementariedad de Eventos:</strong> Mientras <code>HealthMonitoringVideoSignalLossEvent</code> es un evento de salud general, <code>CameraSignalLostEvent</code> es un evento de video más específico. Los eventos de <code>Genetec.Sdk.Events.Video</code> a menudo proporcionan información más detallada sobre la causa o estado específico del problema a nivel de video. Es beneficioso suscribirse a ambos tipos.</p>
+                </div>
+                <div class="insight-block">
+                    <p><strong>Bloqueo de Video (<code>CameraStartBlockEvent</code> / <code>CameraStopBlockEvent</code>):</strong> Es fundamental distinguir entre bloqueos intencionales (privacidad, mantenimiento) y no intencionales (potencialmente maliciosos). La integración podría necesitar consultar registros de auditoría (<code>AuditTrailQuery</code>) para determinar la naturaleza del bloqueo.</p>
+                </div>
+
+                <h3>Tabla 2: Eventos de Video Esenciales</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre del Evento (Clase)</th>
+                                <th>Descripción</th>
+                                <th>Tipo de Problema</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>CameraSignalLostEvent</code></td><td>Pérdida directa de la señal de la cámara.</td><td>Conectividad/Señal</td></tr>
+                            <tr><td><code>CameraSignalRecoveredEvent</code></td><td>Recuperación de la señal de la cámara.</td><td>Conectividad/Señal</td></tr>
+                            <tr><td><code>CameraTransmissionLostEvent</code></td><td>Pérdida de transmisión de la cámara (problema de red entre cámara y archivador).</td><td>Conectividad/Red</td></tr>
+                            <tr><td><code>CameraTransmissionRecoveredEvent</code></td><td>Comunicación entre archivador y cámara recuperada.</td><td>Conectividad/Red</td></tr>
+                            <tr><td><code>CameraNotArchivingEvent</code></td><td>La cámara no está archivando video.</td><td>Grabación</td></tr>
+                            <tr><td><code>CameraStartBlockEvent</code></td><td>Inicio de un bloqueo de video.</td><td>Bloqueo/Privacidad</td></tr>
+                            <tr><td><code>CameraStopBlockEvent</code></td><td>Detención de un bloqueo de video.</td><td>Bloqueo/Privacidad</td></tr>
+                            <tr><td><code>CameraAbnormalMotionEvent</code></td><td>Movimiento anormal de la cámara (manipulación física, vibraciones).</td><td>Movimiento/Integridad</td></tr>
+                            <tr><td><code>CameraMotionEvent</code></td><td>Evento genérico de movimiento de cámara.</td><td>Movimiento</td></tr>
+                            <tr><td><code>CameraMotionOnEvent</code></td><td>Detección de movimiento en la cámara.</td><td>Movimiento</td></tr>
+                            <tr><td><code>CameraMotionOffEvent</code></td><td>El movimiento ha cesado en la cámara.</td><td>Movimiento</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Esta tabla proporciona una vista concisa de los eventos operacionales de video, ayudando al integrador a identificar rápidamente los eventos que impactan directamente la disponibilidad y calidad del flujo de video.</p>
+            </section>
+
+            <section id="analiticas" class="content-section">
+                <h2>Eventos de Analíticas de Video (Video Analytics Events)</h2>
+                <p>El espacio de nombres <code>Genetec.Sdk.Events.VideoAnalytics</code> [1] es crucial para las capacidades de inteligencia de video, permitiendo la detección de patrones y el reconocimiento de objetos o personas. Estos eventos son la base para implementar funcionalidades avanzadas como la detección de personas en listas negras o el conteo de personas.</p>
+
+                <h4>Detección y Reconocimiento de Personas (para "Lista Negra")</h4>
+                <p>Para la funcionalidad de "lista negra", los siguientes eventos son directamente relevantes:</p>
+                <ul>
+                    <li><strong><code>VideoAnalyticsFaceDetectedEvent</code></strong>: Detección de una cara en el campo de visión de la cámara.[1] Primer paso para reconocimiento facial.</li>
+                    <li><strong><code>VideoAnalyticsFaceRecognizedEvent</code></strong>: Reconocimiento de una cara.[1] Relevante para "lista negra", proporciona identidad.</li>
+                </ul>
+                <div class="insight-block">
+                     <p><strong>Lógica de "Lista Negra":</strong> El SDK proporciona el evento de reconocimiento facial (<code>VideoAnalyticsFaceRecognizedEvent</code>). Sin embargo, la lógica de "lista negra" (comparar la cara reconocida con una base de datos de personas no deseadas y generar una alerta) generalmente se implementaría en el software de integración. El integrador debe prever la construcción de esta capa de aplicación adicional.</p>
+                </div>
+
+                <h4>Conteo de Personas</h4>
+                <p>Para la funcionalidad de conteo de personas, los eventos clave son:</p>
+                <ul>
+                    <li><strong><code>VideoAnalyticsPeopleCountingEvent</code></strong>: Evento de conteo de personas.[1] Proporciona datos numéricos.</li>
+                    <li><strong><code>VideoAnalyticsPeopleCountingAlarmEvent</code></strong>: Alarma de conteo de personas.[1] Sugiere que se pueden configurar umbrales en Genetec que disparan una alarma directamente.</li>
+                </ul>
+                <div class="insight-block">
+                    <p><strong>Simplificación con Alarmas de Conteo:</strong> La presencia de <code>VideoAnalyticsPeopleCountingAlarmEvent</code> simplifica la lógica de integración. El sistema Genetec puede configurarse para emitir una alarma cuando se superan umbrales, reduciendo la carga de procesamiento en la aplicación de integración.</p>
+                </div>
+
+                <h4>Otras Analíticas Relevantes</h4>
+                <ul>
+                    <li><strong><code>VideoAnalyticsObjectDetectedEvent</code></strong>: Detección genérica de objetos.[1]</li>
+                    <li><strong><code>VideoAnalyticsObjectCrossedLineEvent</code></strong>: Objeto cruza una línea predefinida.[1] Útil para perímetros virtuales.</li>
+                    <li><strong><code>VideoAnalyticsTamperingEvent</code></strong>: Manipulación de video.[1] Relevante para detectar cámaras oscurecidas intencionalmente, movidas, etc.</li>
+                </ul>
+
+                <h3>Tabla 3: Eventos de Analíticas de Video para Detección y Conteo</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre del Evento (Clase)</th>
+                                <th>Descripción</th>
+                                <th>Aplicación Específica</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>VideoAnalyticsFaceDetectedEvent</code></td><td>Detección de una cara.</td><td>Detección de Personas</td></tr>
+                            <tr><td><code>VideoAnalyticsFaceRecognizedEvent</code></td><td>Reconocimiento de una cara.</td><td>Detección de Personas / Base para Lista Negra</td></tr>
+                            <tr><td><code>VideoAnalyticsPeopleCountingEvent</code></td><td>Conteo de personas.</td><td>Conteo de Personas</td></tr>
+                            <tr><td><code>VideoAnalyticsPeopleCountingAlarmEvent</code></td><td>Alarma de conteo de personas (umbral superado).</td><td>Conteo de Personas</td></tr>
+                            <tr><td><code>VideoAnalyticsObjectDetectedEvent</code></td><td>Detección genérica de objetos.</td><td>Detección de Objetos</td></tr>
+                            <tr><td><code>VideoAnalyticsObjectCrossedLineEvent</code></td><td>Detección de un objeto cruzando una línea predefinida.</td><td>Perímetro Virtual / Control de Flujo</td></tr>
+                            <tr><td><code>VideoAnalyticsTamperingEvent</code></td><td>Manipulación de video (oscurecimiento intencional, movimiento, rociado).</td><td>Integridad de Cámara / Detección de Obscurecimiento</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Esta tabla es directamente relevante para las preguntas específicas del usuario sobre analíticas, proporcionando una confirmación clara de la disponibilidad de los eventos y su aplicación.</p>
+            </section>
+
+            <section id="recomendaciones" class="content-section">
+                <h2>Consideraciones para la Implementación y Recomendaciones</h2>
+                <p>La integración exitosa de alertas a través del SDK de Genetec no solo implica identificar los eventos, sino también comprender cómo suscribirse a ellos y procesarlos de manera eficiente, así como las implicaciones de la configuración del sistema subyacente.</p>
+
+                <h4>Priorización de Alertas Clave para la Integración</h4>
+                <ul>
+                    <li>Priorizar eventos de <code>HealthMonitoring</code> para fallos de conectividad: <code>HealthMonitoringCameraConnectionStoppedUnexpectedlyEvent</code>, <code>HealthMonitoringAllArchivingStoppedEvent</code>.</li>
+                    <li>Eventos <code>CameraSignalLostEvent</code> y <code>VideoAnalyticsTamperingEvent</code> son críticos para cámaras oscurecidas/manipuladas.</li>
+                    <li>Para analíticas: <code>VideoAnalyticsFaceRecognizedEvent</code> y <code>VideoAnalyticsPeopleCountingEvent</code> / <code>VideoAnalyticsPeopleCountingAlarmEvent</code> son esenciales.</li>
+                </ul>
+
+                <h4>Manejo de la Severidad de Eventos</h4>
+                <p>El SDK define <code>enum HealthSeverity</code> [1] (e.g., <code>Warning</code>, <code>Error</code>, <code>Recovered</code>). Utilizar esta enumeración para categorizar y priorizar alertas programáticamente. <code>HealthSeverity.Error</code> requeriría respuesta inmediata, mientras que <code>HealthSeverity.Warning</code> podría ser una notificación menos urgente.</p>
+
+                <h4>Nota sobre la Suscripción y Procesamiento de Eventos</h4>
+                <p>El documento de referencia lista tipos de eventos, pero no detalla el mecanismo de suscripción. La presencia de clases como <code>EventReceivedEventArgs</code> y <code>AlarmTriggeredEventArgs</code> sugiere un modelo basado en delegados. La gestión de alarmas se realiza vía <code>AlarmManager</code>. El desarrollo implicará la implementación de lógica de suscripción a través de los "managers" del SDK. Se necesitará la documentación completa del SDK para detalles de implementación.</p>
+
+                <h4>Recomendaciones para la Arquitectura de Integración de Alertas</h4>
+                <ul>
+                    <li><strong>Diseño Modular:</strong> Separar lógica de consumo de eventos, procesamiento de alertas e interfaz de usuario.</li>
+                    <li><strong>Manejo de Errores y Reintentos:</strong> Implementar mecanismos robustos para desconexiones o errores (reintentos, colas de mensajes).</li>
+                    <li><strong>Configuración del Sistema Genetec:</strong> Es fundamental que las analíticas (detección facial, conteo) estén correctamente habilitadas y configuradas en Genetec Security Center. El SDK solo consume los eventos.</li>
+                    <li><strong>Extensibilidad con Eventos Personalizados:</strong> <code>CustomEventInstance</code> e <code>ICustomEventBuilder</code> / <code>ICustomEventService</code> permiten crear eventos personalizados si es necesario.</li>
+                </ul>
+
+                <h3>Conclusión</h3>
+                <p>El SDK 5.12 de Genetec Security Center ofrece una base sólida y completa para la integración de alertas de video y salud. Los eventos identificados cubren exhaustivamente los requisitos planteados. Una implementación eficiente dependerá de una comprensión clara de la granularidad de los eventos, la priorización basada en la severidad y la correcta configuración del sistema Genetec. Al aprovechar las capacidades del SDK y adoptar una arquitectura de integración modular y robusta, el equipo de desarrollo puede construir un sistema de alertas eficiente que mejore significativamente la supervisión y la capacidad de respuesta operativa.</p>
+            </section>
+        </main>
+
+        <footer class="mt-12 text-center text-sm text-stone-500">
+            <p>&copy; 2024 Explorador Interactivo de Alertas Genetec SDK. Basado en el informe técnico proporcionado.</p>
+        </footer>
+    </div>
+
+    <script>
+        const tabs = document.querySelectorAll('.tab-button');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.dataset.tab;
+
+                tabs.forEach(t => {
+                    t.classList.remove('active', 'border-sky-600');
+                    t.classList.add('border-transparent');
+                });
+                tab.classList.add('active', 'border-sky-600');
+                tab.classList.remove('border-transparent');
+
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === targetTab) {
+                        section.classList.add('active');
+                    }
+                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
